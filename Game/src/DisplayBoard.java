@@ -11,7 +11,8 @@ public class DisplayBoard {
     private String Difficulty;
     private Board board;
 
-    private boolean gameLost = false;
+    // 0 = game in progress, 1 = game won, -1 = game lost
+    private int gameStatus = 0;
 
     private JPanel grid = new JPanel();
     private int flags;
@@ -34,8 +35,18 @@ public class DisplayBoard {
     public void displayGUI() {
         JPanel gridPanel = getjPanel();
 
+        // Create the header panel
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        JLabel flagLabel = new JLabel("Flags: " + flags);
+        JLabel mineLabel = new JLabel("Mines: " + board.getNumberOfMines());
+        JLabel faceLabel = new JLabel(getFaceIcon(gameStatus));
+        headerPanel.add(flagLabel, BorderLayout.WEST);
+        headerPanel.add(mineLabel, BorderLayout.EAST);
+        headerPanel.add(faceLabel, BorderLayout.CENTER);
+
         JFrame frame = new JFrame();
-        frame.add(gridPanel);
+        frame.add(headerPanel, BorderLayout.NORTH); // Add the header panel to the north
+        frame.add(gridPanel, BorderLayout.CENTER); // Add the grid panel to the center
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.addWindowListener(new WindowAdapter() {
             @Override
@@ -73,6 +84,7 @@ public class DisplayBoard {
         return gridPanel;
     }
 
+
     private JButton getjButton(int number, int buttonSize) {
         JButton button = new JButton();
         button.setText("");
@@ -86,6 +98,8 @@ public class DisplayBoard {
             if (number == -1) {
                 button.setText("X");
                 colorFont(button, number);
+                button.setBackground(Color.black);
+                button.setOpaque(true);
                 loseGame();
             } else if (number == 0) {
                 int index = grid.getComponentZOrder(button);
@@ -121,6 +135,14 @@ public class DisplayBoard {
         });
 
         return button;
+    }
+    private Icon getFaceIcon(int gameStatus) {
+        return switch (gameStatus) {
+            case 0 -> new ImageIcon("neutral_face.png"); // Neutral face for game in progress
+            case 1 -> new ImageIcon("win_face.png"); // Happy face for game won
+            case -1 -> new ImageIcon("loss_face.png"); // Sad face for game lost
+            default -> null;
+        };
     }
 
     private void revealNeighbors(int row, int col) {
@@ -159,26 +181,53 @@ public class DisplayBoard {
     }
 
     private void loseGame() {
-        gameLost = true;
+        gameStatus = -1;
+        updateHeader();
         for (int i = 0; i < grid.getComponentCount(); i++) {
             JButton button = (JButton) grid.getComponent(i);
             int number = this.board.getBoardMatrix()[i / 9][i % 9];
             if (number == -1) {
-                button.setText("X");
-                colorFont(button, number);
+                colorFont(button);
             } else {
                 colorFont(button, number);
             }
         }
     }
 
+    private void isGameWon() {
+        int[][] boardMatrix = this.board.getBoardMatrix();
+        int rows = boardMatrix.length;
+        int cols = boardMatrix[0].length;
+
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
+                JButton button = (JButton) grid.getComponent(r * cols + c);
+                int number = boardMatrix[r][c];
+
+                if (number != -1 && button.getText().isEmpty()) {
+                    // There are still non-mine cells not revealed
+                    return;
+                }
+            }
+        }
+
+        // All non-mine cells have been revealed
+        gameStatus = 1;
+    }
+
     public void placeFlag(JButton button) {
+        if (gameStatus != 0 || flags == 0) {
+            return;
+        }
         if (button.getText().isEmpty()) {
             button.setText("F");
+            button.removeActionListener(button.getActionListeners()[0]);
             flags--;
         } else if (button.getText().equals("F")) {
             button.setText("");
             flags++;
+            System.out.println(button.getAlignmentX());
+            updateHeader();
         }
     }
 
@@ -192,5 +241,19 @@ public class DisplayBoard {
             default -> button.setForeground(Color.red);
         }
     }
+    private void colorFont(JButton button) {
+        button.setText("X");
+        button.setForeground(Color.red);
+    }
 
+    private void updateHeader() {
+        // Update the flag label
+        JLabel flagLabel = (JLabel) ((JPanel) ((JFrame) SwingUtilities.getWindowAncestor(grid)).getContentPane().getComponent(0)).getComponent(0);
+        flagLabel.setText("Flags: " + flags);
+
+        // Update the face label
+        JLabel faceLabel = (JLabel) ((JPanel) ((JFrame) SwingUtilities.getWindowAncestor(grid)).getContentPane().getComponent(0)).getComponent(2);
+        faceLabel.setIcon(getFaceIcon(gameStatus));
+        System.out.println(getFaceIcon(gameStatus));
+    }
 }
