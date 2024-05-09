@@ -14,6 +14,8 @@ public class DisplayBoard {
     private JPanel grid = new JPanel();
     private int flags;
 
+    private JLabel faceLabel;
+
     public DisplayBoard(String Difficulty) {
         this.Difficulty = Difficulty;
         switch (Difficulty) {
@@ -36,11 +38,14 @@ public class DisplayBoard {
         JPanel headerPanel = new JPanel(new BorderLayout());
         JLabel flagLabel = new JLabel("Flags: " + flags);
         JLabel mineLabel = new JLabel("Mines: " + board.getNumberOfMines());
-        JLabel faceLabel = new JLabel(getFaceIcon(gameStatus));
+        flagLabel.setPreferredSize(new Dimension(100, 50));
+        this.faceLabel = new JLabel(getFaceIcon(gameStatus));
+        addFaceLabelMouseListener();
         headerPanel.add(flagLabel, BorderLayout.WEST);
         headerPanel.add(mineLabel, BorderLayout.EAST);
         headerPanel.add(faceLabel, BorderLayout.CENTER);
 
+        // Create the JFrame
         JFrame frame = new JFrame();
         frame.add(headerPanel, BorderLayout.NORTH); // Add the header panel to the north
         frame.add(gridPanel, BorderLayout.CENTER); // Add the grid panel to the center
@@ -134,6 +139,17 @@ public class DisplayBoard {
         });
 
         return button;
+    }
+    private void addFaceLabelMouseListener() {
+        faceLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (SwingUtilities.isLeftMouseButton(e)) {
+                    // Handle left-click event on the face icon
+                    restartGame();
+                }
+            }
+        });
     }
     private Icon getFaceIcon(int gameStatus) {
         return switch (gameStatus) {
@@ -255,5 +271,27 @@ public class DisplayBoard {
         // Update the face label
         JLabel faceLabel = (JLabel) ((JPanel) ((JFrame) SwingUtilities.getWindowAncestor(grid)).getContentPane().getComponent(0)).getComponent(2);
         faceLabel.setIcon(getFaceIcon(gameStatus));
+    }
+
+    private void restartGame() {
+        // Reset the game variables and board
+        gameStatus = 0;
+        flags = board.getNumberOfMines();
+
+        // Clear the grid panel
+        grid.removeAll();
+
+        // Repopulate the grid panel with new buttons
+        JPanel newGridPanel = getjPanel();
+        JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(grid);
+        frame.remove(grid);
+        frame.add(newGridPanel, BorderLayout.CENTER);
+        grid = newGridPanel;
+
+        // Update the header components
+        updateHeader();
+
+        // Repack the frame to adjust the size
+        frame.pack();
     }
 }
