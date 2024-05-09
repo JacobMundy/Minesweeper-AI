@@ -1,9 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.util.ArrayList;
 
 public class DisplayBoard {
@@ -107,9 +104,11 @@ public class DisplayBoard {
                 int col = index % board.getBoardMatrix()[0].length;
                 revealNeighbors(row, col);
                 colorFont(button, number);
+                isGameWon();
             }
             else {
                 colorFont(button, number);
+                isGameWon();
             }
         });
         button.addMouseListener(new MouseListener() {
@@ -213,6 +212,7 @@ public class DisplayBoard {
 
         // All non-mine cells have been revealed
         gameStatus = 1;
+        updateHeader();
     }
 
     public void placeFlag(JButton button) {
@@ -221,12 +221,13 @@ public class DisplayBoard {
         }
         if (button.getText().isEmpty()) {
             button.setText("F");
-            button.removeActionListener(button.getActionListeners()[0]);
             flags--;
+            button.setEnabled(false);
+            updateHeader();
         } else if (button.getText().equals("F")) {
             button.setText("");
+            button.setEnabled(true);
             flags++;
-            System.out.println(button.getAlignmentX());
             updateHeader();
         }
     }
@@ -254,6 +255,5 @@ public class DisplayBoard {
         // Update the face label
         JLabel faceLabel = (JLabel) ((JPanel) ((JFrame) SwingUtilities.getWindowAncestor(grid)).getContentPane().getComponent(0)).getComponent(2);
         faceLabel.setIcon(getFaceIcon(gameStatus));
-        System.out.println(getFaceIcon(gameStatus));
     }
 }
