@@ -2,11 +2,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class DisplayBoard {
 
     private String Difficulty;
     private Board board;
+    private HashMap<ArrayList<Integer>, String> revealedCells = new HashMap<>();
 
     // 0 = game in progress, 1 = game won, -1 = game lost
     private int gameStatus = 0;
@@ -75,7 +77,7 @@ public class DisplayBoard {
         JPanel gridPanel = this.grid;
         gridPanel.setLayout(new java.awt.GridLayout(boardMatrix.length, boardMatrix[0].length));
 
-        int buttonSize = 45; // Adjust this value to change the button size
+        int buttonSize = 50; // Adjust this value to change the button size
 
         for (int[] row : boardMatrix) {
             for (int number : row) {
@@ -94,8 +96,8 @@ public class DisplayBoard {
         button.setFocusPainted(false);
         button.setContentAreaFilled(false);
         button.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 14)); // Adjust font style and size as needed
-
-
+        button.setBackground(Color.lightGray);
+        button.setOpaque(true);
         button.addActionListener(e -> {
             if (number == -1) {
                 button.setText("X");
@@ -103,39 +105,32 @@ public class DisplayBoard {
                 button.setBackground(Color.black);
                 button.setOpaque(true);
                 loseGame();
-            } else if (number == 0) {
+            } else {
+                ArrayList<Integer> cellKey = new ArrayList<>();
                 int index = grid.getComponentZOrder(button);
                 int row = index / board.getBoardMatrix()[0].length;
                 int col = index % board.getBoardMatrix()[0].length;
-                revealNeighbors(row, col);
-                colorFont(button, number);
-                isGameWon();
-            }
-            else {
+                cellKey.add(row);
+                cellKey.add(col);
+                revealedCells.put(cellKey, String.valueOf(number));
+
+                if (number == 0) revealNeighbors(row, col);
+
+                System.out.println(getRevealedCells());
+
+                button.setBackground(Color.white);
+                button.setOpaque(true);
                 colorFont(button, number);
                 isGameWon();
             }
         });
-        button.addMouseListener(new MouseListener() {
+        button.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
-                if (SwingUtilities.isRightMouseButton(e)) {
-                    placeFlag(button); // Call the placeFlag function
+            public void mouseReleased(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON3) {
+                    placeFlag(button);
                 }
             }
-
-            // Implement the other required methods from MouseListener
-            @Override
-            public void mousePressed(MouseEvent e) {}
-
-            @Override
-            public void mouseReleased(MouseEvent e) {}
-
-            @Override
-            public void mouseEntered(MouseEvent e) {}
-
-            @Override
-            public void mouseExited(MouseEvent e) {}
         });
 
         return button;
@@ -175,6 +170,11 @@ public class DisplayBoard {
                 continue;
             }
             JButton button = (JButton) grid.getComponent(r * cols + c);
+            if (button.getText().equals("\uD83D\uDEA9")) {
+                continue;
+            }
+            button.setBackground(Color.white);
+            button.setOpaque(true);
             if (button.getText().isEmpty()) {
                 int number = boardMatrix[r][c];
                 if (number == 0) {
@@ -198,15 +198,7 @@ public class DisplayBoard {
     private void loseGame() {
         gameStatus = -1;
         updateHeader();
-        for (int i = 0; i < grid.getComponentCount(); i++) {
-            JButton button = (JButton) grid.getComponent(i);
-            int number = this.board.getBoardMatrix()[i / 9][i % 9];
-            if (number == -1) {
-                colorFont(button);
-            } else {
-                colorFont(button, number);
-            }
-        }
+        disableAllButtons();
     }
 
     private void isGameWon() {
@@ -218,7 +210,6 @@ public class DisplayBoard {
             for (int c = 0; c < cols; c++) {
                 JButton button = (JButton) grid.getComponent(r * cols + c);
                 int number = boardMatrix[r][c];
-
                 if (number != -1 && button.getText().isEmpty()) {
                     // There are still non-mine cells not revealed
                     return;
@@ -229,18 +220,34 @@ public class DisplayBoard {
         // All non-mine cells have been revealed
         gameStatus = 1;
         updateHeader();
+        disableAllButtons();
     }
 
+    private void disableAllButtons() {
+        for (int i = 0; i < grid.getComponentCount(); i++) {
+            JButton button = (JButton) grid.getComponent(i);
+
+            // Remove the action listener to prevent further clicks
+            button.removeActionListener(button.getActionListeners()[0]);
+
+            int number = this.board.getBoardMatrix()[i / 9][i % 9];
+            if (number == -1) {
+                colorFont(button);
+            } else {
+                colorFont(button, number);
+            }
+        }
+    }
     public void placeFlag(JButton button) {
         if (gameStatus != 0 || flags == 0) {
             return;
         }
         if (button.getText().isEmpty()) {
-            button.setText("F");
+            button.setText("\uD83D\uDEA9");
             flags--;
             button.setEnabled(false);
             updateHeader();
-        } else if (button.getText().equals("F")) {
+        } else if (button.getText().equals("\uD83D\uDEA9")) {
             button.setText("");
             button.setEnabled(true);
             flags++;
@@ -277,6 +284,7 @@ public class DisplayBoard {
         // Reset the game variables and board
         gameStatus = 0;
         flags = board.getNumberOfMines();
+        revealedCells.clear();
 
         // Clear the grid panel
         grid.removeAll();
@@ -293,5 +301,23 @@ public class DisplayBoard {
 
         // Repack the frame to adjust the size
         frame.pack();
+    }
+
+    public HashMap<ArrayList<Integer>, String> getRevealedCells() {
+        return revealedCells;
+    }
+
+    public int getGameStatus() {
+        return gameStatus;
+    }
+
+    public String getDifficulty() {
+        return Difficulty;
+    }
+
+
+    //TODO: WHEN DIFFICULTY IS CHANGED, THE BOARD SHOULD BE RESTARTED AND SIZE SHOULD BE CHANGED
+    public void setDifficulty(String difficulty) {
+        Difficulty = difficulty;
     }
 }
