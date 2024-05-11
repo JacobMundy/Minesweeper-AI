@@ -1,3 +1,5 @@
+package Game;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -5,7 +7,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class DisplayBoard {
-
     private String Difficulty;
     private Board board;
     private HashMap<ArrayList<Integer>, String> revealedCells = new HashMap<>();
@@ -14,6 +15,7 @@ public class DisplayBoard {
     private int gameStatus = 0;
 
     private JPanel grid = new JPanel();
+    private JFrame frame = new JFrame();
     private int flags;
 
     private JLabel faceLabel;
@@ -26,7 +28,7 @@ public class DisplayBoard {
             default -> this.board = new Board(9, 9, 10);
         }
         this.flags = this.board.getNumberOfMines();
-        displayGUI();
+        initializeGame();
     }
     public DisplayBoard() {
         this("Easy");
@@ -34,6 +36,20 @@ public class DisplayBoard {
 
 
     public void displayGUI() {
+            frame.pack();
+            frame.setVisible(true);
+
+            // Wait for the JFrame to be closed
+            while (frame.isVisible()) {
+                try {
+                    Thread.sleep(1000); // Sleep for a short time to avoid excessive CPU usage
+                } catch (InterruptedException e) {
+                    System.out.println("Error occurred while sleeping: " + e.getMessage());
+                }
+            }
+    }
+
+    public void initializeGame(){
         JPanel gridPanel = getjPanel();
 
         // Create the header panel
@@ -59,17 +75,8 @@ public class DisplayBoard {
                 System.exit(0); // Exit the program
             }
         });
-        frame.pack();
-        frame.setVisible(true);
 
-        // Wait for the JFrame to be closed
-        while (frame.isVisible()) {
-            try {
-                Thread.sleep(100); // Sleep for a short time to avoid excessive CPU usage
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
+        this.frame = frame;
     }
 
     private JPanel getjPanel() {
@@ -177,6 +184,14 @@ public class DisplayBoard {
             button.setOpaque(true);
             if (button.getText().isEmpty()) {
                 int number = boardMatrix[r][c];
+                ArrayList<Integer> cellKey = new ArrayList<>();
+                int index = grid.getComponentZOrder(button);
+                int matrixRow = index / board.getBoardMatrix()[0].length;
+                int matrixCol = index % board.getBoardMatrix()[0].length;
+                neighbors.add(new int[]{matrixRow, matrixCol});
+                cellKey.add(matrixRow);
+                cellKey.add(matrixCol);
+                revealedCells.put(cellKey, String.valueOf(number));
                 if (number == 0) {
                     button.setText(String.valueOf(number));
                     colorFont(button, number);
@@ -226,7 +241,6 @@ public class DisplayBoard {
     private void disableAllButtons() {
         for (int i = 0; i < grid.getComponentCount(); i++) {
             JButton button = (JButton) grid.getComponent(i);
-
             // Remove the action listener to prevent further clicks
             button.removeActionListener(button.getActionListeners()[0]);
 
@@ -253,6 +267,13 @@ public class DisplayBoard {
             flags++;
             updateHeader();
         }
+    }
+
+    public void revealCell(int row, int col) {
+        int[][] boardMatrix = this.board.getBoardMatrix();
+        JButton button = (JButton) grid.getComponent(row * boardMatrix[0].length + col);
+        button.doClick();
+        System.out.println("Revealed cell at row " + row + ", column " + col);
     }
 
     private void colorFont(JButton button, int number) {
@@ -321,3 +342,4 @@ public class DisplayBoard {
         Difficulty = difficulty;
     }
 }
+
