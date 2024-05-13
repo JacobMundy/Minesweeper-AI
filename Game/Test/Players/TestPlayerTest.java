@@ -2,29 +2,22 @@ package Players;
 
 import Game.DisplayBoard;
 import org.junit.jupiter.api.Test;
-
+import java.util.ArrayList;
+import static org.junit.jupiter.api.Assertions.*;
 
 class TestPlayerTest {
 
     @Test
-    void testPlayer() throws InterruptedException {
+    void testPlayer() {
         DisplayBoard displayBoard = new DisplayBoard();
+        TestPlayer testPlayer = new TestPlayer(displayBoard);
+        ArrayList<int[]> testGetMoves = new ArrayList<>();
+        assertEquals(testGetMoves, testPlayer.getMoves());
+        testPlayer.play();
+        testGetMoves.add(new int[]{0, 0});
+        assertArrayEquals(testGetMoves.get(0), testPlayer.getMoves().get(0));
 
-        // Create a new thread for the displayGUI method
-        Thread guiThread = new Thread(displayBoard::displayGUI);
-        guiThread.start();
 
-        Thread.sleep(1000);
-        // Create a new thread for the player's actions
-        Thread playerThread = new Thread(() -> {
-            TestPlayer testPlayer = new TestPlayer(displayBoard);
-            testPlayer.play();
-        });
-        playerThread.start();
-
-        // Wait for the threads to finish
-        guiThread.join();
-        playerThread.join();
     }
 
 }
