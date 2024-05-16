@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class DisplayBoard {
     private String Difficulty;
@@ -122,9 +123,7 @@ public class DisplayBoard {
                 revealedCells.put(cellKey, String.valueOf(number));
 
                 if (number == 0) revealNeighbors(row, col);
-
-                System.out.println(getRevealedCells());
-
+//                System.out.println(getRevealedCells());
                 button.setBackground(Color.white);
                 button.setOpaque(true);
                 colorFont(button, number);
@@ -155,9 +154,9 @@ public class DisplayBoard {
     }
     private Icon getFaceIcon(int gameStatus) {
         return switch (gameStatus) {
-            case 0 -> new ImageIcon("neutral_face.png"); // Neutral face for game in progress
-            case 1 -> new ImageIcon("win_face.png"); // Happy face for game won
-            case -1 -> new ImageIcon("loss_face.png"); // Sad face for game lost
+            case 0 -> new ImageIcon("../neutral_face.png"); // Neutral face for game in progress
+            case 1 -> new ImageIcon("../win_face.png"); // Happy face for game won
+            case -1 -> new ImageIcon("../loss_face.png"); // Sad face for game lost
             default -> null;
         };
     }
@@ -193,7 +192,7 @@ public class DisplayBoard {
                 cellKey.add(matrixCol);
                 revealedCells.put(cellKey, String.valueOf(number));
                 if (number == 0) {
-                    button.setText(String.valueOf(number));
+//                    button.setText(String.valueOf(number));
                     colorFont(button, number);
                     for (int dr = -1; dr <= 1; dr++) {
                         for (int dc = -1; dc <= 1; dc++) {
@@ -243,8 +242,9 @@ public class DisplayBoard {
             JButton button = (JButton) grid.getComponent(i);
             // Remove the action listener to prevent further clicks
             button.removeActionListener(button.getActionListeners()[0]);
-
-            int number = this.board.getBoardMatrix()[i / 9][i % 9];
+            int boardLength = this.board.getBoardMatrix().length;
+            int boardWidth = this.board.getBoardMatrix()[0].length;
+            int number = this.board.getBoardMatrix()[i / boardWidth][i % boardLength];
             if (number == -1) {
                 colorFont(button);
             } else {
@@ -252,7 +252,17 @@ public class DisplayBoard {
             }
         }
     }
-    public void placeFlag(JButton button) {
+    private void placeFlag(JButton button) {
+        placeFlagHelper(button);
+    }
+
+    public void placeFlag(int row, int col) {
+        int[][] boardMatrix = this.board.getBoardMatrix();
+        JButton button = (JButton) grid.getComponent(row * boardMatrix[0].length + col);
+        placeFlagHelper(button);
+    }
+
+    private void placeFlagHelper(JButton button) {
         if (gameStatus != 0 || flags == 0) {
             return;
         }
@@ -279,7 +289,7 @@ public class DisplayBoard {
     private void colorFont(JButton button, int number) {
         button.setText(String.valueOf(number));
         switch (number){
-            case 0 -> button.setForeground(Color.blue);
+            case 0 -> button.setForeground(Color.WHITE);
             case 1 -> button.setForeground(Color.black);
             case 2 -> button.setForeground(Color.PINK);
             case 3 -> button.setForeground(Color.orange);
@@ -336,10 +346,44 @@ public class DisplayBoard {
         return Difficulty;
     }
 
+    public ArrayList<ArrayList<Integer>> getUnrevealedCells() {
+        ArrayList<ArrayList<Integer>> unrevealedCells = new ArrayList<>();
+        int[][] boardMatrix = this.board.getBoardMatrix();
+        for (int row = 0; row < boardMatrix.length; row++) {
+            for (int column = 0; column < boardMatrix[0].length; column++) {
+                JButton button = (JButton) grid.getComponent(row * boardMatrix[0].length + column);
+                if (button.getText().isEmpty()) {
+                    unrevealedCells.add(new ArrayList<>(List.of(row, column)));
+                }
+            }
+        }
+        return unrevealedCells;
+    }
+
+    public ArrayList<ArrayList<Integer>> getNeighboringCells(ArrayList<Integer> cell) {
+        ArrayList<ArrayList<Integer>> neighboringCells = new ArrayList<>();
+        int row = cell.get(0);
+        int column = cell.get(1);
+        for (int dr = -1; dr <= 1; dr++) {
+            for (int dc = -1; dc <= 1; dc++) {
+                if (dr == 0 && dc == 0) {
+                    continue;
+                }
+                int newRow = row + dr;
+                int newColumn = column + dc;
+                if (newRow < 0 || newRow >= board.getBoardMatrix().length || newColumn < 0 || newColumn >= board.getBoardMatrix()[0].length) {
+                    continue;
+                }
+                neighboringCells.add(new ArrayList<>(List.of(newRow, newColumn)));
+            }
+        }
+        return neighboringCells;
+    }
 
     //TODO: WHEN DIFFICULTY IS CHANGED, THE BOARD SHOULD BE RESTARTED AND SIZE SHOULD BE CHANGED
     public void setDifficulty(String difficulty) {
         Difficulty = difficulty;
     }
+
 }
 

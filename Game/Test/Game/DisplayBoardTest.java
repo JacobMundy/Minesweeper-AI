@@ -12,12 +12,14 @@ class DisplayBoardTest {
         assertEquals(0, displayBoard.getGameStatus());
         displayBoard.setDifficulty("Hard");
         assertEquals("Hard", displayBoard.getDifficulty());
-    }
+        displayBoard.placeFlag(0, 0);
+     }
 
     @Test
-    void displayGUI() {
+    void displayGUI() throws InterruptedException {
         DisplayBoard displayBoard = new DisplayBoard();
         Thread guiThread = new Thread(displayBoard::displayGUI);
-
+        guiThread.start();
+//        guiThread.join();
     }
 }

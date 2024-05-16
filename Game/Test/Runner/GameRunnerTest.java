@@ -10,5 +10,12 @@ class GameRunnerTest {
     void startGame() {
         GameRunner gameRunner = new GameRunner();
         assertDoesNotThrow(() -> gameRunner.startGame(false));
+
+    }
+
+    @Test
+    void startGameWithDisplay() throws InterruptedException {
+        GameRunner gameRunner = new GameRunner();
+        gameRunner.startGame(true);
     }
 }
