@@ -11,6 +11,7 @@ public class DisplayBoard {
     private String Difficulty;
     private Board board;
     private HashMap<ArrayList<Integer>, String> revealedCells = new HashMap<>();
+    private ArrayList<Integer> boardInfo = new ArrayList<>();
 
     // 0 = game in progress, 1 = game won, -1 = game lost
     private int gameStatus = 0;
@@ -24,13 +25,23 @@ public class DisplayBoard {
     public DisplayBoard(String Difficulty) {
         this.Difficulty = Difficulty;
         switch (Difficulty) {
-            case "Medium" -> this.board = new Board(16, 16, 40);
-            case "Hard" -> this.board = new Board(16, 30, 99);
-            default -> this.board = new Board(9, 9, 10);
+            case "Medium" -> {
+                this.board = new Board(16, 16, 40);
+                setBoardInfo(16, 16, 40);
+            }
+            case "Hard" -> {
+                this.board = new Board(16, 30, 99);
+                setBoardInfo(16, 30, 99);
+            }
+            default -> {
+                this.board = new Board(9, 9, 10);
+                setBoardInfo(9, 9, 10);
+            }
         }
         this.flags = this.board.getNumberOfMines();
         initializeGame();
     }
+
     public DisplayBoard() {
         this("Easy");
     }
@@ -320,6 +331,7 @@ public class DisplayBoard {
     private void restartGame() {
         // Reset the game variables and board
         gameStatus = 0;
+        board = new Board(boardInfo.get(0), boardInfo.get(1), boardInfo.get(2));
         flags = board.getNumberOfMines();
         revealedCells.clear();
 
@@ -338,6 +350,12 @@ public class DisplayBoard {
 
         // Repack the frame to adjust the size
         frame.pack();
+    }
+
+    private void setBoardInfo(int rowSize, int columnSize, int mines) {
+        this.boardInfo.add(rowSize);
+        this.boardInfo.add(columnSize);
+        this.boardInfo.add(mines);
     }
 
     public HashMap<ArrayList<Integer>, String> getRevealedCells() {
@@ -367,23 +385,9 @@ public class DisplayBoard {
     }
 
     public ArrayList<ArrayList<Integer>> getNeighboringCells(ArrayList<Integer> cell) {
-        ArrayList<ArrayList<Integer>> neighboringCells = new ArrayList<>();
         int row = cell.get(0);
         int column = cell.get(1);
-        for (int dr = -1; dr <= 1; dr++) {
-            for (int dc = -1; dc <= 1; dc++) {
-                if (dr == 0 && dc == 0) {
-                    continue;
-                }
-                int newRow = row + dr;
-                int newColumn = column + dc;
-                if (newRow < 0 || newRow >= board.getBoardMatrix().length || newColumn < 0 || newColumn >= board.getBoardMatrix()[0].length) {
-                    continue;
-                }
-                neighboringCells.add(new ArrayList<>(List.of(newRow, newColumn)));
-            }
-        }
-        return neighboringCells;
+        return getNeighboringCells(row, column);
     }
 
     public ArrayList<ArrayList<Integer>> getNeighboringCells(int row, int column) {
@@ -403,6 +407,7 @@ public class DisplayBoard {
         }
         return neighboringCells;
     }
+
 
     //TODO: WHEN DIFFICULTY IS CHANGED, THE BOARD SHOULD BE RESTARTED AND SIZE SHOULD BE CHANGED
     public void setDifficulty(String difficulty) {
