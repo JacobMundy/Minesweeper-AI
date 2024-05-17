@@ -1,19 +1,26 @@
 package Runner;
 
 import Game.DisplayBoard;
-import Players.Player;
-import Players.RandomPlayer;
+import Players.*;
 
 public class GameRunner {
     private DisplayBoard gameBoard;
     private Player player;
-    public GameRunner() {
+    public GameRunner(String playerName) {
         System.out.println("Creating a new Game");
         this.gameBoard = new DisplayBoard();
 
-        //TODO: Change when new players are implemented
-        System.out.println("Creating a new RandomPlayer");
-        this.player = new RandomPlayer(gameBoard);
+        System.out.println("Creating a new Player");
+        switch (playerName) {
+            case "RandomPlayer" ->
+                this.player = new RandomPlayer(gameBoard);
+            case "StrategyPlayer" ->
+                this.player = new StrategyPlayer(gameBoard);
+            default -> {
+                System.out.println("Invalid player name, defaulting to RandomPlayer");
+                this.player = new RandomPlayer(gameBoard);
+            }
+        }
     }
 
     public void startGame(boolean DisplayGame) throws InterruptedException {

@@ -263,10 +263,10 @@ public class DisplayBoard {
     }
 
     private void placeFlagHelper(JButton button) {
-        if (gameStatus != 0 || flags == 0) {
+        if (gameStatus != 0) {
             return;
         }
-        if (button.getText().isEmpty()) {
+        if (button.getText().isEmpty() && flags > 0) {
             button.setText("\uD83D\uDEA9");
             flags--;
             button.setEnabled(false);
@@ -277,6 +277,12 @@ public class DisplayBoard {
             flags++;
             updateHeader();
         }
+    }
+
+    public boolean isFlagged(int row, int col) {
+        int[][] boardMatrix = this.board.getBoardMatrix();
+        JButton button = (JButton) grid.getComponent(row * boardMatrix[0].length + col);
+        return button.getText().equals("\uD83D\uDEA9");
     }
 
     public void revealCell(int row, int col) {
@@ -364,6 +370,24 @@ public class DisplayBoard {
         ArrayList<ArrayList<Integer>> neighboringCells = new ArrayList<>();
         int row = cell.get(0);
         int column = cell.get(1);
+        for (int dr = -1; dr <= 1; dr++) {
+            for (int dc = -1; dc <= 1; dc++) {
+                if (dr == 0 && dc == 0) {
+                    continue;
+                }
+                int newRow = row + dr;
+                int newColumn = column + dc;
+                if (newRow < 0 || newRow >= board.getBoardMatrix().length || newColumn < 0 || newColumn >= board.getBoardMatrix()[0].length) {
+                    continue;
+                }
+                neighboringCells.add(new ArrayList<>(List.of(newRow, newColumn)));
+            }
+        }
+        return neighboringCells;
+    }
+
+    public ArrayList<ArrayList<Integer>> getNeighboringCells(int row, int column) {
+        ArrayList<ArrayList<Integer>> neighboringCells = new ArrayList<>();
         for (int dr = -1; dr <= 1; dr++) {
             for (int dc = -1; dc <= 1; dc++) {
                 if (dr == 0 && dc == 0) {

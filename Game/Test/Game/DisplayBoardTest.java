@@ -22,4 +22,11 @@ class DisplayBoardTest {
         guiThread.start();
 //        guiThread.join();
     }
+
+    @Test
+    void getNeighboringCells(){
+        DisplayBoard displayBoard = new DisplayBoard();
+        System.out.println(displayBoard.getNeighboringCells(0, 0));
+        System.out.println(displayBoard.getNeighboringCells(6, 6));
+    }
 }
