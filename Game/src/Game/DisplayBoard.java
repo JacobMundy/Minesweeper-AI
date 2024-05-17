@@ -370,6 +370,10 @@ public class DisplayBoard {
         return Difficulty;
     }
 
+    public ArrayList<Integer> getBoardInfo() {
+        return boardInfo;
+    }
+
     public ArrayList<ArrayList<Integer>> getUnrevealedCells() {
         ArrayList<ArrayList<Integer>> unrevealedCells = new ArrayList<>();
         int[][] boardMatrix = this.board.getBoardMatrix();
@@ -409,9 +413,16 @@ public class DisplayBoard {
     }
 
 
-    //TODO: WHEN DIFFICULTY IS CHANGED, THE BOARD SHOULD BE RESTARTED AND SIZE SHOULD BE CHANGED
     public void setDifficulty(String difficulty) {
         Difficulty = difficulty;
+        this.boardInfo.clear();
+        switch (difficulty) {
+            case "Medium" -> setBoardInfo(16, 16, 40);
+            case "Hard" -> setBoardInfo(16, 30, 99);
+            default -> setBoardInfo(9, 9, 10);
+
+        }
+        restartGame();
     }
 
 }

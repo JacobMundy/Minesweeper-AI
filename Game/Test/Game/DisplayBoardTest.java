@@ -15,6 +15,11 @@ class DisplayBoardTest {
         assertEquals(0, displayBoard.getGameStatus());
         displayBoard.setDifficulty("Hard");
         assertEquals("Hard", displayBoard.getDifficulty());
+        ArrayList<Integer> expectedBoardInfo = new ArrayList<>();
+        expectedBoardInfo.add(16);
+        expectedBoardInfo.add(30);
+        expectedBoardInfo.add(99);
+        assertEquals(expectedBoardInfo, displayBoard.getBoardInfo());
         displayBoard.placeFlag(0, 0);
      }
 
@@ -23,7 +28,8 @@ class DisplayBoardTest {
         DisplayBoard displayBoard = new DisplayBoard();
         Thread guiThread = new Thread(displayBoard::displayGUI);
         guiThread.start();
-
+//        displayBoard.setDifficulty("Hard");
+//
 //        try {
 //            guiThread.join();
 //        } catch (InterruptedException e) {
