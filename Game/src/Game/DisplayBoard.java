@@ -1,6 +1,7 @@
 package Game;
 
 import javax.swing.*;
+import javax.swing.plaf.metal.MetalButtonUI;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
@@ -105,7 +106,7 @@ public class DisplayBoard {
 
         // Create the JFrame
         JFrame frame = new JFrame();
-        frame.add(pauseMenu, BorderLayout.SOUTH); // Add the pause menu to the south);
+        frame.add(pauseMenu, BorderLayout.SOUTH);
         frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("P"), "pause");
         frame.getRootPane().getActionMap().put("pause", new AbstractAction(){
             @Override
@@ -132,7 +133,7 @@ public class DisplayBoard {
     private JPanel getjPanel() {
         int[][] boardMatrix = this.board.getBoardMatrix();
         JPanel gridPanel = this.grid;
-        gridPanel.setLayout(new java.awt.GridLayout(boardMatrix.length, boardMatrix[0].length));
+        gridPanel.setLayout(new GridLayout(boardMatrix.length, boardMatrix[0].length));
 
         int buttonSize = 25; // Adjust this value to change the button size
 
@@ -147,12 +148,14 @@ public class DisplayBoard {
 
 
     private JButton getjButton(int number, int buttonSize) {
-        JButton button = new JButton();
+        CustomButton button = new CustomButton();
+
+
         button.setText("");
         button.setPreferredSize(new Dimension(buttonSize, buttonSize));
         button.setFocusPainted(false);
         button.setContentAreaFilled(false);
-        button.setFont(new Font(Font.MONOSPACED, Font.BOLD, 14)); // Adjust font style and size as needed
+        button.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 20)); // Adjust font style and size as needed
         button.setBackground(Color.lightGray);
         button.setOpaque(true);
         button.setHorizontalTextPosition(SwingConstants.CENTER);
@@ -471,3 +474,29 @@ public class DisplayBoard {
 
 }
 
+// All of this just because JButtons auto truncate text without any way to change it.
+
+class CustomButton extends JButton {
+    public CustomButton() {
+        super();
+        setUI(new CustomButtonUI());
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        g.setColor(getForeground());
+        g.setFont(getFont());
+        FontMetrics metrics = g.getFontMetrics();
+        int x = (getWidth() - metrics.stringWidth(getText())) / 2;
+        int y = ((getHeight() - metrics.getHeight()) / 2) + metrics.getAscent();
+        g.drawString(getText(), x, y);
+    }
+
+    private static class CustomButtonUI extends MetalButtonUI {
+        @Override
+        public void paint(Graphics g, JComponent c) {
+            // Do nothing here to prevent the UI delegate from painting the text
+        }
+    }
+}
