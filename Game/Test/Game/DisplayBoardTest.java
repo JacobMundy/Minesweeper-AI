@@ -24,17 +24,13 @@ class DisplayBoardTest {
      }
 
     @Test
-    void displayGUI() {
-        DisplayBoard displayBoard = new DisplayBoard();
+    void displayGUI() throws InterruptedException {
+        DisplayBoard displayBoard = new DisplayBoard("Hard");
         Thread guiThread = new Thread(displayBoard::displayGUI);
         guiThread.start();
 //        displayBoard.setDifficulty("Hard");
-//
-//        try {
-//            guiThread.join();
-//        } catch (InterruptedException e) {
-//            System.out.println("Thread interrupted");
-//        }
+        guiThread.join();
+
     }
 
     @Test

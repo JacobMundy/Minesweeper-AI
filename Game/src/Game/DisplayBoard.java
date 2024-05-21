@@ -12,7 +12,6 @@ public class DisplayBoard {
     private Board board;
     private HashMap<ArrayList<Integer>, String> revealedCells = new HashMap<>();
     private ArrayList<Integer> boardInfo = new ArrayList<>();
-
     // 0 = game in progress, 1 = game won, -1 = game lost
     private int gameStatus = 0;
 
@@ -50,6 +49,7 @@ public class DisplayBoard {
     public void displayGUI() {
             frame.pack();
             frame.setVisible(true);
+            frame.setLocation(200, 200);
 
             // Wait for the JFrame to be closed
             while (frame.isVisible()) {
@@ -253,9 +253,7 @@ public class DisplayBoard {
             JButton button = (JButton) grid.getComponent(i);
             // Remove the action listener to prevent further clicks
             button.removeActionListener(button.getActionListeners()[0]);
-            int boardLength = this.board.getBoardMatrix().length;
-            int boardWidth = this.board.getBoardMatrix()[0].length;
-            int number = this.board.getBoardMatrix()[i / boardWidth][i % boardLength];
+            int number = this.board.getBoardMatrix()[i / board.getBoardMatrix()[0].length][i % board.getBoardMatrix()[0].length];
             if (number == -1) {
                 colorFont(button);
             } else {
