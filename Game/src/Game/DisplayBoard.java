@@ -18,8 +18,15 @@ public class DisplayBoard {
     private JPanel grid = new JPanel();
     private JFrame frame = new JFrame();
     private int flags;
-
     private JLabel faceLabel;
+
+    private JLabel flagLabel;
+    private JLabel mineLabel;
+
+    private JPanel pauseMenu;
+    private JButton restartButton;
+    private JButton statsButton;
+    private JButton quitButton;
 
     public DisplayBoard(String Difficulty) {
         this.Difficulty = Difficulty;
@@ -66,8 +73,8 @@ public class DisplayBoard {
 
         // Create the header panel
         JPanel headerPanel = new JPanel(new BorderLayout());
-        JLabel flagLabel = new JLabel("Flags: " + flags);
-        JLabel mineLabel = new JLabel("Mines: " + board.getNumberOfMines());
+        flagLabel = new JLabel("Flags: " + flags);
+        mineLabel = new JLabel("Mines: " + board.getNumberOfMines());
         flagLabel.setPreferredSize(new Dimension(100, 50));
         this.faceLabel = new JLabel(getFaceIcon(gameStatus));
         addFaceLabelMouseListener();
@@ -75,8 +82,39 @@ public class DisplayBoard {
         headerPanel.add(mineLabel, BorderLayout.EAST);
         headerPanel.add(faceLabel, BorderLayout.CENTER);
 
+
+        // Initialize the pause menu
+        pauseMenu = new JPanel();
+        pauseMenu.setVisible(true);
+
+        // Initialize the buttons
+        restartButton = new JButton("Restart");
+        statsButton = new JButton("Stats");
+        quitButton = new JButton("Quit");
+
+        // Add action listeners to the buttons
+        restartButton.addActionListener(e -> restartGame());
+        statsButton.addActionListener(e -> showStats());
+        quitButton.addActionListener(e -> System.exit(0));
+
+        // Add the buttons to the pause menu
+        pauseMenu.add(restartButton);
+        pauseMenu.add(statsButton);
+        pauseMenu.add(quitButton);
+
+
         // Create the JFrame
         JFrame frame = new JFrame();
+        frame.add(pauseMenu, BorderLayout.SOUTH); // Add the pause menu to the south);
+        frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("P"), "pause");
+        frame.getRootPane().getActionMap().put("pause", new AbstractAction(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Toggle the visibility of the pause menu
+                togglePauseMenu();
+            }
+        });
+
         frame.add(headerPanel, BorderLayout.NORTH); // Add the header panel to the north
         frame.add(gridPanel, BorderLayout.CENTER); // Add the grid panel to the center
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -96,7 +134,7 @@ public class DisplayBoard {
         JPanel gridPanel = this.grid;
         gridPanel.setLayout(new java.awt.GridLayout(boardMatrix.length, boardMatrix[0].length));
 
-        int buttonSize = 50; // Adjust this value to change the button size
+        int buttonSize = 25; // Adjust this value to change the button size
 
         for (int[] row : boardMatrix) {
             for (int number : row) {
@@ -114,9 +152,11 @@ public class DisplayBoard {
         button.setPreferredSize(new Dimension(buttonSize, buttonSize));
         button.setFocusPainted(false);
         button.setContentAreaFilled(false);
-        button.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 14)); // Adjust font style and size as needed
+        button.setFont(new Font(Font.MONOSPACED, Font.BOLD, 14)); // Adjust font style and size as needed
         button.setBackground(Color.lightGray);
         button.setOpaque(true);
+        button.setHorizontalTextPosition(SwingConstants.CENTER);
+        button.setVerticalTextPosition(SwingConstants.CENTER);
         button.addActionListener(e -> {
             if (number == -1) {
                 button.setText("X");
@@ -134,7 +174,6 @@ public class DisplayBoard {
                 revealedCells.put(cellKey, String.valueOf(number));
 
                 if (number == 0) revealNeighbors(row, col);
-//                System.out.println(getRevealedCells());
                 button.setBackground(Color.white);
                 button.setOpaque(true);
                 colorFont(button, number);
@@ -172,6 +211,11 @@ public class DisplayBoard {
         };
     }
 
+    public void togglePauseMenu() {
+        pauseMenu.setVisible(!pauseMenu.isVisible());
+        System.out.println("Pause menu visibility: " + pauseMenu.isVisible());
+    }
+
     private void revealNeighbors(int row, int col) {
         int[][] boardMatrix = this.board.getBoardMatrix();
         int rows = boardMatrix.length;
@@ -203,7 +247,6 @@ public class DisplayBoard {
                 cellKey.add(matrixCol);
                 revealedCells.put(cellKey, String.valueOf(number));
                 if (number == 0) {
-//                    button.setText(String.valueOf(number));
                     colorFont(button, number);
                     for (int dr = -1; dr <= 1; dr++) {
                         for (int dc = -1; dc <= 1; dc++) {
@@ -318,11 +361,9 @@ public class DisplayBoard {
 
     private void updateHeader() {
         // Update the flag label
-        JLabel flagLabel = (JLabel) ((JPanel) ((JFrame) SwingUtilities.getWindowAncestor(grid)).getContentPane().getComponent(0)).getComponent(0);
         flagLabel.setText("Flags: " + flags);
 
         // Update the face label
-        JLabel faceLabel = (JLabel) ((JPanel) ((JFrame) SwingUtilities.getWindowAncestor(grid)).getContentPane().getComponent(0)).getComponent(2);
         faceLabel.setIcon(getFaceIcon(gameStatus));
     }
 
@@ -348,6 +389,11 @@ public class DisplayBoard {
 
         // Repack the frame to adjust the size
         frame.pack();
+    }
+
+    private void showStats() {
+        // TODO
+        System.out.println("Showing game statistics...");
     }
 
     private void setBoardInfo(int rowSize, int columnSize, int mines) {

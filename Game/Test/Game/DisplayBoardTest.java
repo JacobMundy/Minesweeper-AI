@@ -30,6 +30,7 @@ class DisplayBoardTest {
         guiThread.start();
 //        displayBoard.setDifficulty("Hard");
         guiThread.join();
+        Thread.sleep(1000);
 
     }
 
