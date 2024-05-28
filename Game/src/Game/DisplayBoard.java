@@ -15,14 +15,16 @@ public class DisplayBoard {
     private ArrayList<Integer> boardInfo = new ArrayList<>();
     // 0 = game in progress, 1 = game won, -1 = game lost
     private int gameStatus = 0;
-
     private JPanel grid = new JPanel();
     private JFrame frame = new JFrame();
+
     private int flags;
     private JLabel faceLabel;
-
     private JLabel flagLabel;
-
+    private JLabel mineLabel;
+    private JLabel timeLabel;
+    private Timer timer;
+    private int elapsedTime = 0;
     private JPanel pauseMenu;
 
     public DisplayBoard(String Difficulty) {
@@ -51,18 +53,18 @@ public class DisplayBoard {
 
 
     public void displayGUI() {
-            frame.pack();
-            frame.setVisible(true);
-            frame.setLocation(200, 200);
+        frame.pack();
+        frame.setVisible(true);
+        frame.setLocation(200, 200);
 
-            // Wait for the JFrame to be closed
-            while (frame.isVisible()) {
-                try {
-                    Thread.sleep(1000); // Sleep for a short time to avoid excessive CPU usage
-                } catch (InterruptedException e) {
-                    System.out.println("Error occurred while sleeping: " + e.getMessage());
-                }
+        // Wait for the JFrame to be closed
+        while (frame.isVisible()) {
+            try {
+                Thread.sleep(1000); // Sleep for a short time to avoid excessive CPU usage
+            } catch (InterruptedException e) {
+                System.out.println("Error occurred while sleeping: " + e.getMessage());
             }
+        }
     }
 
     public void initializeGame(){
@@ -71,12 +73,16 @@ public class DisplayBoard {
         // Create the header panel
         JPanel headerPanel = new JPanel(new BorderLayout());
         flagLabel = new JLabel("Flags: " + flags);
-        JLabel mineLabel = new JLabel("Mines: " + board.getNumberOfMines());
-        flagLabel.setPreferredSize(new Dimension(100, 50));
+        mineLabel = new JLabel("Mines: " + board.getNumberOfMines());
+        timeLabel = new JLabel("Time: 0");
+        JPanel timeAndFlagPanel = new JPanel();
+        timeAndFlagPanel.setLayout(new GridLayout(2,1));
+        timeAndFlagPanel.add(flagLabel);
+        timeAndFlagPanel.add(timeLabel);
+        headerPanel.add(timeAndFlagPanel, BorderLayout.WEST);
         this.faceLabel = new JLabel(getFaceIcon(gameStatus));
         faceLabel.setPreferredSize(new Dimension(100, 100));
         addFaceLabelMouseListener();
-        headerPanel.add(flagLabel, BorderLayout.WEST);
         headerPanel.add(mineLabel, BorderLayout.EAST);
         headerPanel.add(faceLabel, BorderLayout.CENTER);
 
@@ -134,6 +140,11 @@ public class DisplayBoard {
         });
 
         this.frame = frame;
+
+        timer = new Timer(1000, e -> {
+            elapsedTime++;
+            timeLabel.setText("Time: " + elapsedTime);
+        });
     }
 
     private JPanel getjPanel() {
@@ -167,6 +178,7 @@ public class DisplayBoard {
         button.setHorizontalTextPosition(SwingConstants.CENTER);
         button.setVerticalTextPosition(SwingConstants.CENTER);
         button.addActionListener(e -> {
+            if (!timer.isRunning()) timer.start();
             if (number == -1) {
                 button.setText("X");
                 colorFont(button, number);
@@ -273,6 +285,7 @@ public class DisplayBoard {
     }
 
     private void loseGame() {
+        timer.stop();
         gameStatus = -1;
         updateHeader();
         disableAllButtons();
@@ -295,6 +308,7 @@ public class DisplayBoard {
         }
 
         // All non-mine cells have been revealed
+        timer.stop();
         gameStatus = 1;
         updateHeader();
         disableAllButtons();
@@ -371,6 +385,8 @@ public class DisplayBoard {
     private void updateHeader() {
         // Update the flag label
         flagLabel.setText("Flags: " + flags);
+        mineLabel.setText("Mines: " + board.getNumberOfMines());
+        timeLabel.setText("Time: " + elapsedTime);
 
         // Update the face label
         faceLabel.setIcon(getFaceIcon(gameStatus));
@@ -378,6 +394,8 @@ public class DisplayBoard {
 
     private void restartGame() {
         // Reset the game variables and board
+        timer.stop();
+        elapsedTime = 0;
         gameStatus = 0;
         board = new Board(boardInfo.get(0), boardInfo.get(1), boardInfo.get(2));
         flags = board.getNumberOfMines();
