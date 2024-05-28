@@ -22,12 +22,8 @@ public class DisplayBoard {
     private JLabel faceLabel;
 
     private JLabel flagLabel;
-    private JLabel mineLabel;
 
     private JPanel pauseMenu;
-    private JButton restartButton;
-    private JButton statsButton;
-    private JButton quitButton;
 
     public DisplayBoard(String Difficulty) {
         this.Difficulty = Difficulty;
@@ -75,9 +71,10 @@ public class DisplayBoard {
         // Create the header panel
         JPanel headerPanel = new JPanel(new BorderLayout());
         flagLabel = new JLabel("Flags: " + flags);
-        mineLabel = new JLabel("Mines: " + board.getNumberOfMines());
+        JLabel mineLabel = new JLabel("Mines: " + board.getNumberOfMines());
         flagLabel.setPreferredSize(new Dimension(100, 50));
         this.faceLabel = new JLabel(getFaceIcon(gameStatus));
+        faceLabel.setPreferredSize(new Dimension(100, 100));
         addFaceLabelMouseListener();
         headerPanel.add(flagLabel, BorderLayout.WEST);
         headerPanel.add(mineLabel, BorderLayout.EAST);
@@ -89,16 +86,25 @@ public class DisplayBoard {
         pauseMenu.setVisible(true);
 
         // Initialize the buttons
-        restartButton = new JButton("Restart");
-        statsButton = new JButton("Stats");
-        quitButton = new JButton("Quit");
+        JComboBox<String> difficultyComboBox = new JComboBox<>(new String[]{"Easy", "Medium", "Hard"});
+        JButton restartButton = new JButton("Restart");
+        JButton statsButton = new JButton("Stats");
+        JButton quitButton = new JButton("Quit");
+
 
         // Add action listeners to the buttons
         restartButton.addActionListener(e -> restartGame());
         statsButton.addActionListener(e -> showStats());
         quitButton.addActionListener(e -> System.exit(0));
+        difficultyComboBox.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                String selectedDifficulty = (String) e.getItem();
+                setDifficulty(selectedDifficulty);
+            }
+        });
 
         // Add the buttons to the pause menu
+        pauseMenu.add(difficultyComboBox);
         pauseMenu.add(restartButton);
         pauseMenu.add(statsButton);
         pauseMenu.add(quitButton);
