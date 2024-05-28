@@ -1,7 +1,9 @@
 # Minesweeper 
 ## Description
 This project is my personal recreation of the original minesweeper game using Java and Swing 
-![EasyBoard](img/Easy.png)
+
+![HardBoard](img/Hard.png)
+
 ## Structure
 ### Board
 The Board class holds the basic matrix including the mines and numbers
