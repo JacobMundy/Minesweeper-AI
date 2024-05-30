@@ -1,5 +1,4 @@
 package Game;
-
 import javax.swing.*;
 import javax.swing.plaf.metal.MetalButtonUI;
 import java.awt.*;
@@ -392,7 +391,7 @@ public class DisplayBoard {
         faceLabel.setIcon(getFaceIcon(gameStatus));
     }
 
-    private void restartGame() {
+    public void restartGame() {
         // Reset the game variables and board
         timer.stop();
         elapsedTime = 0;
