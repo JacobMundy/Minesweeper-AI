@@ -10,7 +10,10 @@ import java.awt.event.KeyEvent;
 public class GameRunner {
     private DisplayBoard gameBoard;
     private Player player;
+    private String playerName;
+
     public GameRunner(String playerName) {
+        this.playerName = playerName;
         System.out.println("Creating a new Game");
         this.gameBoard = new DisplayBoard();
 
@@ -55,7 +58,16 @@ public class GameRunner {
 
 
     public void restartPlayer() {
-        this.player = new RandomPlayer(gameBoard);
+        switch (playerName) {
+            case "RandomPlayer" ->
+                this.player = new RandomPlayer(gameBoard);
+            case "StrategyPlayer" ->
+                this.player = new StrategyPlayer(gameBoard);
+            default -> {
+                System.out.println("Invalid player name, defaulting to RandomPlayer");
+                this.player = new RandomPlayer(gameBoard);
+            }
+        }
         Thread playerThread = new Thread(player::play);
         playerThread.start();
     }
