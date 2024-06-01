@@ -8,15 +8,18 @@ import java.util.HashMap;
 import java.util.List;
 
 public class DisplayBoard {
+    // Info about the board
     private String Difficulty;
     private Board board;
     private HashMap<ArrayList<Integer>, String> revealedCells = new HashMap<>();
     private ArrayList<Integer> boardInfo = new ArrayList<>();
+
     // 0 = game in progress, 1 = game won, -1 = game lost
     private int gameStatus = 0;
     private JPanel grid = new JPanel();
     private JFrame frame = new JFrame();
 
+    // Labels and variables for the header
     private int flags;
     private JLabel faceLabel;
     private JLabel flagLabel;
@@ -481,6 +484,16 @@ public class DisplayBoard {
         }
         return neighboringCells;
     }
+
+
+    public void addKeyBinding(String name, int keyEvent, Action action) {
+        InputMap inputMap = frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap actionMap = frame.getRootPane().getActionMap();
+
+        inputMap.put(KeyStroke.getKeyStroke(keyEvent, 0), name);
+        actionMap.put(name, action);
+    }
+
 
 
     public void setDifficulty(String difficulty) {
