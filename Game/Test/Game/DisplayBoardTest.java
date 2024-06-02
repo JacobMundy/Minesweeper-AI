@@ -25,7 +25,7 @@ class DisplayBoardTest {
 
     @Test
     void displayGUI() throws InterruptedException {
-        DisplayBoard displayBoard = new DisplayBoard("Hard");
+        DisplayBoard displayBoard = new DisplayBoard();
         Thread guiThread = new Thread(displayBoard::displayGUI);
         guiThread.start();
 //        displayBoard.setDifficulty("Hard");
