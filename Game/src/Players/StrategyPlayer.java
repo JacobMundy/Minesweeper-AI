@@ -39,8 +39,7 @@ public class StrategyPlayer extends Player {
                     int row = cell.get(0);
                     int col = cell.get(1);
                     ArrayList<ArrayList<Integer>> neighboringCells = gameBoard.getNeighboringCells(row, col);
-                  checkedCells.add(cell);
-                    System.out.println("Checking cell: " + cell + " with " + neighboringMines + " neighboring mines.");
+                    checkedCells.add(cell);
                     madeMove = checkNeighborList(neighboringCells, neighboringMines) || madeMove;
 
                     if (gameBoard.getGameStatus() != 0) {
