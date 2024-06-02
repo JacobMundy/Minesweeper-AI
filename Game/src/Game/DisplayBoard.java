@@ -6,6 +6,7 @@ import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class DisplayBoard {
     // Info about the board
@@ -13,6 +14,7 @@ public class DisplayBoard {
     private Board board;
     private HashMap<ArrayList<Integer>, String> revealedCells = new HashMap<>();
     private ArrayList<Integer> boardInfo = new ArrayList<>();
+    private boolean firstClick = true;
 
     // 0 = game in progress, 1 = game won, -1 = game lost
     private int gameStatus = 0;
@@ -166,9 +168,9 @@ public class DisplayBoard {
     }
 
 
-    private JButton getjButton(int number, int buttonSize) {
+    private JButton getjButton(int initialNumber, int buttonSize) {
         CustomButton button = new CustomButton();
-
+        AtomicReference<Integer> number = new AtomicReference<>(initialNumber);
 
         button.setText("");
         button.setPreferredSize(new Dimension(buttonSize, buttonSize));
@@ -181,9 +183,18 @@ public class DisplayBoard {
         button.setVerticalTextPosition(SwingConstants.CENTER);
         button.addActionListener(e -> {
             if (!timer.isRunning()) timer.start();
-            if (number == -1) {
+            // In addition to the safety check, we also need a new function
+            // due to swing threading issues causing the cell to not be revealed
+            if (firstClick && number.get() == -1){
+                firstClick = false;
+                int index = grid.getComponentZOrder(button);
+                int row = index / board.getBoardMatrix()[0].length;
+                int col = index % board.getBoardMatrix()[0].length;
+                SwingUtilities.invokeLater(() -> handleFirstClick(row, col, button, number));
+            }
+            else if (number.get() == -1) {
                 button.setText("X");
-                colorFont(button, number);
+                colorFont(button, initialNumber);
                 button.setBackground(Color.black);
                 button.setOpaque(true);
                 loseGame();
@@ -194,12 +205,12 @@ public class DisplayBoard {
                 int col = index % board.getBoardMatrix()[0].length;
                 cellKey.add(row);
                 cellKey.add(col);
-                revealedCells.put(cellKey, String.valueOf(number));
+                revealedCells.put(cellKey, String.valueOf(initialNumber));
 
-                if (number == 0) revealNeighbors(row, col);
+                if (number.get() == 0) revealNeighbors(row, col);
                 button.setBackground(Color.white);
                 button.setOpaque(true);
-                colorFont(button, number);
+                colorFont(button, initialNumber);
                 isGameWon();
             }
         });
@@ -211,9 +222,30 @@ public class DisplayBoard {
                 }
             }
         });
-
         return button;
     }
+
+    public void regenerateBoard(int safeRow, int safeColumn) {
+        // Generate a new safe board
+        board.generateSafeBoard(safeRow, safeColumn);
+
+        // Clear the grid panel
+        grid.removeAll();
+
+        // Repopulate the grid panel with new buttons
+        JPanel newGridPanel = getjPanel();
+        JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(grid);
+        frame.remove(grid);
+        frame.add(newGridPanel, BorderLayout.CENTER);
+        grid = newGridPanel;
+
+        // Update the header components
+        updateHeader();
+
+        // Repack the frame to adjust the size
+        frame.pack();
+        }
+
     private void addFaceLabelMouseListener() {
         faceLabel.addMouseListener(new MouseAdapter() {
             @Override
@@ -225,6 +257,25 @@ public class DisplayBoard {
             }
         });
     }
+
+
+    private void handleFirstClick(int row, int col, JButton button, AtomicReference<Integer> number) {
+        regenerateBoard(row, col);
+        int newValue = board.getBoardMatrix()[row][col];
+        number.set(newValue); // Update the number with the new value
+        button.setText(String.valueOf(newValue)); // Reveal the button manually
+        colorFont(button, newValue); // Color the font based on the new value
+        button.setBackground(Color.white);
+        button.setOpaque(true);
+        ArrayList<Integer> cellKey = new ArrayList<>();
+        cellKey.add(row);
+        cellKey.add(col);
+        revealedCells.put(cellKey, String.valueOf(newValue));
+        revealNeighbors(row, col);
+        isGameWon();
+
+    }
+
     private Icon getFaceIcon(int gameStatus) {
         return switch (gameStatus) {
             case 0 -> new ImageIcon("../neutral_face.png"); // Neutral face for game in progress
@@ -402,6 +453,7 @@ public class DisplayBoard {
         board = new Board(boardInfo.get(0), boardInfo.get(1), boardInfo.get(2));
         flags = board.getNumberOfMines();
         revealedCells.clear();
+        firstClick = true;
 
         // Clear the grid panel
         grid.removeAll();
