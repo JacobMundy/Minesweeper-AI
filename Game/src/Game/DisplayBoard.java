@@ -199,6 +199,7 @@ public class DisplayBoard {
                 button.setOpaque(true);
                 loseGame();
             } else {
+                firstClick = false;
                 ArrayList<Integer> cellKey = new ArrayList<>();
                 int index = grid.getComponentZOrder(button);
                 int row = index / board.getBoardMatrix()[0].length;
@@ -228,22 +229,7 @@ public class DisplayBoard {
     public void regenerateBoard(int safeRow, int safeColumn) {
         // Generate a new safe board
         board.generateSafeBoard(safeRow, safeColumn);
-
-        // Clear the grid panel
-        grid.removeAll();
-
-        // Repopulate the grid panel with new buttons
-        JPanel newGridPanel = getjPanel();
-        JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(grid);
-        frame.remove(grid);
-        frame.add(newGridPanel, BorderLayout.CENTER);
-        grid = newGridPanel;
-
-        // Update the header components
-        updateHeader();
-
-        // Repack the frame to adjust the size
-        frame.pack();
+        clearGrid();
         }
 
     private void addFaceLabelMouseListener() {
@@ -455,6 +441,11 @@ public class DisplayBoard {
         revealedCells.clear();
         firstClick = true;
 
+        // Clear the grid panel
+        clearGrid();
+    }
+
+    private void clearGrid() {
         // Clear the grid panel
         grid.removeAll();
 
