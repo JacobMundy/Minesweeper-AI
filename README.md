@@ -28,7 +28,7 @@ Stats Button: Will open stats screen (Not implemented)
 
 Quit Button: Exits Game
 
-R: Will restart game and current bot player (if bot player is ran using GameRunner Class
+R: Will restart game and current bot player (if bot player is ran using GameRunner Class)
 
 
 
