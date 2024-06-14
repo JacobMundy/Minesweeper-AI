@@ -15,8 +15,9 @@ The grid is formed of Jbuttons that all have event listeners that handle what th
 Each of the players is in their own class files with their own logic and can be created and used on a board separately 
 ### GameRunner
 This class when with the start function will run both a GUI and a specified bot player and allowing easy restarts with one key to see the progress of the bot
-### Stats
-This class will display the stats of each game, it does not discriminate between bot and human player.
+
+## Stats
+A function located in DisplayBoard will display the stats of each game when ran, it does not discriminate between bot and human player.
 The stats are saved in a file called stats.txt and will be loaded in the stats screen (shown below).
 ![Stats](img/Stats.png)
 ## Controls
