@@ -48,13 +48,14 @@ public class StrategyPlayer extends Player {
                 }
             }
 
-//          If no move was made, break to avoid infinite loop
+            // If no move was made, break out of the loop
             if (!madeMove) {
                 break;
             }
 
             revealedCells = gameBoard.getRevealedCells(); // Update revealedCells map after each iteration
         }
+        // If loop breaks, make a random move and recurse
         if (gameBoard.getGameStatus() == 0) {
             ArrayList<Integer> randomCell = getRandomUnrevealedCell();
             int row = randomCell.get(0);

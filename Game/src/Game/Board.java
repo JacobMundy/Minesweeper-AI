@@ -50,6 +50,7 @@ public class Board {
 
     }
 
+    // Generate a new board with a safe cell (used for first move)
     public void generateSafeBoard(int safeRow, int safeColumn) {
         // Clear the current board
         for (int[] row : this.boardMatrix) {
