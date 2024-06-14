@@ -2,9 +2,9 @@
 ## Description
 This project is my personal recreation of the original minesweeper game using Java and Swing 
 
-<div style="text-align:center">
+<p align="center">
 <img src="img/Hard.png" alt="Hard Difficulty Game">
-</div>
+</p>
 
 ## Structure
 ### Board
@@ -22,9 +22,9 @@ This class when with the start function will run both a GUI and a specified bot 
 A function located in DisplayBoard will display the stats of each game when ran, it does not discriminate between bot and human player.
 The stats are saved in a file called stats.txt and will be loaded in the stats screen (shown below).
 
-<div style="text-align:center">
+<p align="center">
 <img src="img/Stats.png" alt="Stats Image">
-</div>
+</p>
 
 ## Controls
 Right Click: Flag cell
