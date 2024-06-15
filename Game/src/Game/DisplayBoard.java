@@ -148,6 +148,12 @@ public class DisplayBoard {
                 System.exit(0); // Exit the program
             }
         });
+        statsFrame.setIconImage(new ImageIcon("icons/info.png").getImage());
+        statsFrame.setTitle("Player Stats");
+
+        frame.setIconImage(new ImageIcon("icons/mine.png").getImage());
+        frame.setTitle("Minesweeper");
+
 
         this.frame = frame;
 
@@ -270,9 +276,9 @@ public class DisplayBoard {
 
     private Icon getFaceIcon(int gameStatus) {
         return switch (gameStatus) {
-            case 0 -> new ImageIcon("../neutral_face.png"); // Neutral face for game in progress
-            case 1 -> new ImageIcon("../win_face.png"); // Happy face for game won
-            case -1 -> new ImageIcon("../loss_face.png"); // Sad face for game lost
+            case 0 -> new ImageIcon("icons/neutral_face.png"); // Neutral face for game in progress
+            case 1 -> new ImageIcon("icons/win_face.png"); // Happy face for game won
+            case -1 -> new ImageIcon("icons/loss_face.png"); // Sad face for game lost
             default -> null;
         };
     }
