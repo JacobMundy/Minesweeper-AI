@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.Scanner;
 
+/**
+ * The type Display board.
+ */
 public class DisplayBoard {
     // Info about the board
     private String Difficulty;
@@ -23,6 +26,8 @@ public class DisplayBoard {
 
     // 0 = game in progress, 1 = game won, -1 = game lost
     private int gameStatus = 0;
+
+    // Components for the GUI
     private JPanel grid = new JPanel();
     private JFrame frame = new JFrame();
     private JFrame statsFrame = new JFrame();
@@ -37,6 +42,11 @@ public class DisplayBoard {
     private int elapsedTime = 0;
     private JPanel pauseMenu;
 
+    /**
+     * Instantiates a new Display board on specified difficulty.
+     *
+     * @param Difficulty the game difficulty (Easy, Medium, Hard)
+     */
     public DisplayBoard(String Difficulty) {
         this.Difficulty = Difficulty;
         switch (Difficulty) {
@@ -57,11 +67,18 @@ public class DisplayBoard {
         initializeGame();
     }
 
+    /**
+     * Instantiates a new Display board on easy mode.
+     */
     public DisplayBoard() {
         this("Easy");
     }
 
 
+    /**
+     * Displays the User Interface
+     * Will  urunntil the JFrame is closed.
+     */
     public void displayGUI() {
         frame.pack();
         frame.setVisible(true);
@@ -77,7 +94,8 @@ public class DisplayBoard {
         }
     }
 
-    public void initializeGame(){
+
+    private void initializeGame(){
         JPanel gridPanel = getjPanel();
 
         // Create the header panel
@@ -144,7 +162,6 @@ public class DisplayBoard {
         frame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                // Perform any necessary cleanup or exit the program here
                 System.exit(0); // Exit the program
             }
         });
@@ -168,7 +185,7 @@ public class DisplayBoard {
         JPanel gridPanel = this.grid;
         gridPanel.setLayout(new GridLayout(boardMatrix.length, boardMatrix[0].length));
 
-        int buttonSize = 25; // Adjust this value to change the button size
+        int buttonSize = 25;
 
         for (int[] row : boardMatrix) {
             for (int number : row) {
@@ -195,7 +212,7 @@ public class DisplayBoard {
         button.setVerticalTextPosition(SwingConstants.CENTER);
         button.addActionListener(e -> {
             if (!timer.isRunning()) timer.start();
-            // In addition to the safety check, we also need a new function
+            // In addition to the first click check, we also need a new function (handleFirstClick)
             // due to swing threading issues causing the cell to not be revealed
             if (firstClick && number.get() == -1){
                 firstClick = false;
@@ -211,8 +228,11 @@ public class DisplayBoard {
                 button.setOpaque(true);
                 loseGame();
             } else {
+                // Any cell that isn't a mine
                 firstClick = false;
                 ArrayList<Integer> cellKey = new ArrayList<>();
+
+                // Save the cell key to the revealedCells map (used by heuristic players)
                 int index = grid.getComponentZOrder(button);
                 int row = index / board.getBoardMatrix()[0].length;
                 int col = index % board.getBoardMatrix()[0].length;
@@ -220,6 +240,7 @@ public class DisplayBoard {
                 cellKey.add(col);
                 revealedCells.put(cellKey, String.valueOf(initialNumber));
 
+                // Reveal the cell
                 if (number.get() == 0) revealNeighbors(row, col);
                 button.setBackground(Color.white);
                 button.setOpaque(true);
@@ -238,10 +259,16 @@ public class DisplayBoard {
         return button;
     }
 
+    /**
+     * Regenerates the board with a new safe cell.
+     * (used when the first click is a mine)
+     *
+     * @param safeRow    the safe cell row
+     * @param safeColumn the safe cell column
+     */
     public void regenerateBoard(int safeRow, int safeColumn) {
-        // Generate a new safe board
         board.generateSafeBoard(safeRow, safeColumn);
-        clearGrid();
+        resetGrid();
         }
 
     private void addFaceLabelMouseListener() {
@@ -283,6 +310,9 @@ public class DisplayBoard {
         };
     }
 
+    /**
+     * Toggles pause menu.
+     */
     public void togglePauseMenu() {
         pauseMenu.setVisible(!pauseMenu.isVisible());
         System.out.println("Pause menu visibility: " + pauseMenu.isVisible());
@@ -386,6 +416,12 @@ public class DisplayBoard {
         placeFlagHelper(button);
     }
 
+    /**
+     * Flag cell.
+     *
+     * @param row the cell row
+     * @param col the cell column
+     */
     public void placeFlag(int row, int col) {
         int[][] boardMatrix = this.board.getBoardMatrix();
         JButton button = (JButton) grid.getComponent(row * boardMatrix[0].length + col);
@@ -409,17 +445,29 @@ public class DisplayBoard {
         }
     }
 
+    /**
+     * Returns whether specified cell is flagged.
+     *
+     * @param row the cell row
+     * @param col the cell column
+     * @return boolean
+     */
     public boolean isFlagged(int row, int col) {
         int[][] boardMatrix = this.board.getBoardMatrix();
         JButton button = (JButton) grid.getComponent(row * boardMatrix[0].length + col);
         return button.getText().equals("\uD83D\uDEA9");
     }
 
+    /**
+     * Reveals specified cell.
+     *
+     * @param row the cell row
+     * @param col the cell column
+     */
     public void revealCell(int row, int col) {
         int[][] boardMatrix = this.board.getBoardMatrix();
         JButton button = (JButton) grid.getComponent(row * boardMatrix[0].length + col);
         button.doClick();
-        System.out.println("Revealed cell at row " + row + ", column " + col);
     }
 
     private void colorFont(JButton button, int number) {
@@ -447,6 +495,9 @@ public class DisplayBoard {
         faceLabel.setIcon(getFaceIcon(gameStatus));
     }
 
+    /**
+     * Restart game.
+     */
     public void restartGame() {
         // Reset the game variables and board
         timer.stop();
@@ -458,10 +509,11 @@ public class DisplayBoard {
         firstClick = true;
 
         // Clear the grid panel
-        clearGrid();
+        resetGrid();
     }
 
-    private void clearGrid() {
+
+    private void resetGrid() {
         // Clear the grid panel
         grid.removeAll();
 
@@ -493,6 +545,10 @@ public class DisplayBoard {
         }
     }
 
+    /**
+     * Displays the users stats.
+     * (located in stats.txt)
+     */
     public void showStats() {
         try {
             File file = new File("stats.txt");
@@ -581,6 +637,9 @@ public class DisplayBoard {
         }
     }
 
+    /**
+     * Refreshes the stats frame.
+     */
     public void updateStats() {
         if (statsShown) {
             statsFrame.getContentPane().removeAll();
@@ -595,22 +654,47 @@ public class DisplayBoard {
         this.boardInfo.add(mines);
     }
 
+    /**
+     * Gets revealed cells.
+     *
+     * @return HashMap of revealed cells
+     */
     public HashMap<ArrayList<Integer>, String> getRevealedCells() {
         return revealedCells;
     }
 
+    /**
+     * Gets game status.
+     *
+     * @return the game status (0 = game in progress, 1 = game won, -1 = game lost)
+     */
     public int getGameStatus() {
         return gameStatus;
     }
 
+    /**
+     * Gets difficulty.
+     *
+     * @return the difficulty
+     */
     public String getDifficulty() {
         return Difficulty;
     }
 
+    /**
+     * Gets board info.
+     *
+     * @return the board info
+     */
     public ArrayList<Integer> getBoardInfo() {
         return boardInfo;
     }
 
+    /**
+     * Gets unrevealed cells.
+     *
+     * @return ArrayList of row column pairs
+     */
     public ArrayList<ArrayList<Integer>> getUnrevealedCells() {
         ArrayList<ArrayList<Integer>> unrevealedCells = new ArrayList<>();
         int[][] boardMatrix = this.board.getBoardMatrix();
@@ -625,12 +709,26 @@ public class DisplayBoard {
         return unrevealedCells;
     }
 
+    /**
+     * Gets neighboring cells.
+     * (calls the other getNeighboringCells method)
+     *
+     * @param cell List in format of [row, column]
+     * @return List of neighboring cells
+     */
     public ArrayList<ArrayList<Integer>> getNeighboringCells(ArrayList<Integer> cell) {
         int row = cell.get(0);
         int column = cell.get(1);
         return getNeighboringCells(row, column);
     }
 
+    /**
+     * Gets neighboring cells.
+     *
+     * @param row    the cell row
+     * @param column the cell column
+     * @return List of neighboring cells
+     */
     public ArrayList<ArrayList<Integer>> getNeighboringCells(int row, int column) {
         ArrayList<ArrayList<Integer>> neighboringCells = new ArrayList<>();
         for (int dr = -1; dr <= 1; dr++) {
@@ -650,6 +748,14 @@ public class DisplayBoard {
     }
 
 
+    /**
+     * Adds a key binding to the JFrame.
+     * (used by heuristic players)
+     *
+     * @param name     Event name
+     * @param keyEvent the key event
+     * @param action   the action
+     */
     public void addKeyBinding(String name, int keyEvent, Action action) {
         InputMap inputMap = frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
         ActionMap actionMap = frame.getRootPane().getActionMap();
@@ -659,7 +765,12 @@ public class DisplayBoard {
     }
 
 
-
+    /**
+     * Sets difficulty.
+     * And restarts the game with the new difficulty.
+     *
+     * @param difficulty String value of Difficulty
+     */
     public void setDifficulty(String difficulty) {
         Difficulty = difficulty;
         this.boardInfo.clear();
@@ -676,12 +787,21 @@ public class DisplayBoard {
 
 // All of this just because JButtons auto truncate text without any way to change it.
 
+/**
+ * This class is a custom JButton that does not truncate text.
+ */
 class CustomButton extends JButton {
+
+    /**
+     * Instantiates the CustomButton.
+     * (Essentially a JButton)
+     */
     public CustomButton() {
         super();
         setUI(new CustomButtonUI());
     }
 
+    // Paints the text in the center of the button
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -697,6 +817,7 @@ class CustomButton extends JButton {
         @Override
         public void paint(Graphics g, JComponent c) {
             // Do nothing here to prevent the UI delegate from painting the text
+            // If the superclass paint method is called, ellipsis will be added BLOCKING the text
         }
     }
 }

@@ -7,11 +7,19 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
+/**
+ * The type Game runner.
+ */
 public class GameRunner {
     private DisplayBoard gameBoard;
     private Player player;
     private String playerName;
 
+    /**
+     * Instantiates a new Game runner.
+     *
+     * @param playerName the player name (RandomPlayer or StrategyPlayer)
+     */
     public GameRunner(String playerName) {
         this.playerName = playerName;
         System.out.println("Creating a new Game");
@@ -30,6 +38,12 @@ public class GameRunner {
         }
     }
 
+    /**
+     * Starts game.
+     *
+     * @param DisplayGame display the game or not
+     * @throws InterruptedException when the thread is interrupted
+     */
     public void startGame(boolean DisplayGame) throws InterruptedException {
         gameBoard.addKeyBinding("restart", KeyEvent.VK_R, new AbstractAction() {
             @Override
@@ -57,6 +71,10 @@ public class GameRunner {
     }
 
 
+    /**
+     * Restart player.
+     * (really just creates a new player object and starts the thread)
+     */
     public void restartPlayer() {
         switch (playerName) {
             case "RandomPlayer" ->

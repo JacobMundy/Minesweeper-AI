@@ -6,16 +6,29 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
+/**
+ * The type Strategy player.
+ */
 public class StrategyPlayer extends Player {
 
     private DisplayBoard gameBoard;
     private HashMap<ArrayList<Integer>, String> revealedCells = new HashMap<>();
     private ArrayList<ArrayList<Integer>> checkedCells = new ArrayList<>();
 
+    /**
+     * Instantiates a new Strategy player.
+     *
+     * @param gameBoard the game board you want to play on
+     */
     public StrategyPlayer(DisplayBoard gameBoard) {
         this.gameBoard = gameBoard;
     }
 
+    /**
+     * Runs the players logic.
+     * Recommended to run this in a new thread if
+     * you are displaying the games GUI.
+     */
     @Override
     public void play() {
         System.out.println("Playing the game");

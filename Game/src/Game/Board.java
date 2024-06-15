@@ -3,6 +3,9 @@ package Game;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * The representation of the game board.
+ */
 public class Board {
     private final int[][] boardMatrix;
     private final int numberOfMines;
@@ -10,6 +13,13 @@ public class Board {
     private final int boardLength;
     private final int boardWidth;
 
+    /**
+     * Instantiates a new Board.
+     *
+     * @param boardLength   the board length
+     * @param boardWidth    the board width
+     * @param numberOfMines the number of mines
+     */
     public Board(int boardLength, int boardWidth, int numberOfMines) {
         this.boardMatrix = new int[boardLength][boardWidth];
         this.numberOfMines = numberOfMines;
@@ -50,7 +60,13 @@ public class Board {
 
     }
 
-    // Generate a new board with a safe cell (used for first move)
+    /**
+     * Resets board with safe cell.
+     * Does not generate new board changes the current board
+     *
+     * @param safeRow    the cells row
+     * @param safeColumn the cells column
+     */
     public void generateSafeBoard(int safeRow, int safeColumn) {
         // Clear the current board
         for (int[] row : this.boardMatrix) {
@@ -91,11 +107,20 @@ public class Board {
     }
 
 
-
+    /**
+     * Gets number of mines.
+     *
+     * @return the number of mines
+     */
     public int getNumberOfMines() {
         return this.numberOfMines;
     }
 
+    /**
+     * Get board matrix
+     *
+     * @return  board matrix as a 2D array
+     */
     public int[][] getBoardMatrix() {
         return this.boardMatrix;
     }

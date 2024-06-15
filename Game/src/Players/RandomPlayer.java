@@ -6,14 +6,27 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
+/**
+ * The type Random player.
+ */
 public class RandomPlayer extends Player {
     private DisplayBoard gameBoard;
     private HashMap<ArrayList<Integer>, String> revealedCells = new HashMap<>();
 
+    /**
+     * Instantiates a new Random player.
+     *
+     * @param gameBoard the game board you want to play on
+     */
     public RandomPlayer(DisplayBoard gameBoard) {
         this.gameBoard = gameBoard;
     }
 
+    /**
+     * Runs the players logic.
+     * Recommended to run this in a new thread if
+     * you are displaying the games GUI.
+     */
     @Override
     public void play() {
         System.out.println("Playing the game");
