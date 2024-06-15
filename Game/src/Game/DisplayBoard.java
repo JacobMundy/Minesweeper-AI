@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.Scanner;
 
 public class DisplayBoard {
     // Info about the board
@@ -18,11 +19,13 @@ public class DisplayBoard {
     private HashMap<ArrayList<Integer>, String> revealedCells = new HashMap<>();
     private ArrayList<Integer> boardInfo = new ArrayList<>();
     private boolean firstClick = true;
+    private boolean statsShown = false;
 
     // 0 = game in progress, 1 = game won, -1 = game lost
     private int gameStatus = 0;
     private JPanel grid = new JPanel();
     private JFrame frame = new JFrame();
+    private JFrame statsFrame = new JFrame();
 
     // Labels and variables for the header
     private int flags;
@@ -332,6 +335,7 @@ public class DisplayBoard {
         updateHeader();
         disableAllButtons();
         saveStats(false, elapsedTime, Difficulty);
+        updateStats();
     }
 
     private void isGameWon() {
@@ -356,6 +360,7 @@ public class DisplayBoard {
         updateHeader();
         disableAllButtons();
         saveStats(true, elapsedTime, Difficulty);
+        updateStats();
     }
 
     private void disableAllButtons() {
@@ -475,30 +480,37 @@ public class DisplayBoard {
             if (fileCreated) System.out.println("File created: " + file.getName());
 
             FileWriter writer = new FileWriter(file, true);
-            writer.append("Game ")
-                    .append(gameWon ? "won" : "lost")
-                    .append(" in ")
-                    .append(String.valueOf(timeElapsed))
-                    .append(" seconds on ")
-                    .append(difficulty)
-                    .append(" difficulty\n");
+            writer.append(gameWon ? "won " : "lost ").append(String.valueOf(timeElapsed)).append(" ").append(difficulty).append("\n");
             writer.close();
         } catch (Exception e) {
             System.out.println("Error occurred while creating file: " + e.getMessage());
         }
     }
 
-    private void showStats() {
+    public void showStats() {
         try {
             File file = new File("stats.txt");
-            if (file.createNewFile()) {
-                System.out.println("File created: " + file.getName());
+            if (file.createNewFile()) System.out.println("File created: " + file.getName());
+            // If the stats frame is already open, remove all components
+            // for a fresh start otherwise reset the frame size and location
+            if (statsShown) {
+                statsFrame.getContentPane().removeAll();
+            } else {
+                statsFrame.setSize(400, 400);
+                statsFrame.setLocationRelativeTo(frame);
             }
 
-            JFrame statsFrame = new JFrame();
+            statsShown = true;
+
+            // Set the closing behavior and add a window listener
             statsFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-            statsFrame.setSize(400, 400);
-            statsFrame.setLocationRelativeTo(frame);
+            statsFrame.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosing(WindowEvent e) {
+                    statsShown = false;
+                }
+            });
+
             statsFrame.setTitle("Game Stats");
             statsFrame.setLayout(new BorderLayout());
 
@@ -508,11 +520,16 @@ public class DisplayBoard {
             int totalGames = 0;
             int totalWins = 0;
 
-            for (String line : new java.util.Scanner(file).useDelimiter("\\A").next().split("\n")) {
+            Scanner scanner = new java.util.Scanner(file).useDelimiter("\\A");
+            String fileContent = scanner.hasNext() ? scanner.next() : "";
+            for (String line : fileContent.split("\n")) {
+                if (line.isEmpty()) {
+                    continue;
+                }
                 String[] splitLine = line.split(" ");
-                String gameResult = splitLine[1];
-                String timeElapsed = splitLine[3];
-                String difficulty = splitLine[6];
+                String gameResult = splitLine[0];
+                String timeElapsed = splitLine[1];
+                String difficulty = splitLine[2];
                 data.add(new String[]{gameResult, timeElapsed, difficulty});
 
                 totalGames++;
@@ -520,23 +537,49 @@ public class DisplayBoard {
                     totalWins++;
                 }
             }
-
+            // Calculate the win percentage and display the total games and wins
             double winPercentage = (double) totalWins / totalGames * 100;
 
             JLabel totalGamesLabel = new JLabel("Total games: " + totalGames);
             statsFrame.add(totalGamesLabel, BorderLayout.NORTH);
 
             JLabel totalWinsLabel = new JLabel("Total wins: " + totalWins + " (" + winPercentage + "%)");
-            statsFrame.add(totalWinsLabel, BorderLayout.SOUTH);
 
             JTable statsTable = new JTable(data.toArray(new String[0][]), columnNames);
             JScrollPane scrollPane = new JScrollPane(statsTable);
             statsFrame.add(scrollPane, BorderLayout.CENTER);
-            statsFrame.setVisible(true);
 
+            // Add a button to clear the stats
+            JButton clearStatsButton = new JButton("Clear Stats");
+            clearStatsButton.addActionListener(e -> {
+                try {
+                    FileWriter writer = new FileWriter(file);
+                    writer.write("");
+                    writer.close();
+                    statsShown = false;
+                    statsFrame.getContentPane().removeAll();
+                    statsFrame.dispose();
+                } catch (Exception ex) {
+                    System.out.println("Error occurred while clearing stats: " + ex.getMessage());
+                }
+            });
+
+            JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+            bottomPanel.add(totalWinsLabel);
+            bottomPanel.add(clearStatsButton);
+            statsFrame.add(bottomPanel, BorderLayout.SOUTH);
+            statsFrame.setVisible(true);
 
         } catch (Exception e) {
             System.out.println("Error occurred while opening file: " + e.getMessage());
+        }
+    }
+
+    public void updateStats() {
+        if (statsShown) {
+            statsFrame.getContentPane().removeAll();
+            showStats();
+            frame.setVisible(true);
         }
     }
 
